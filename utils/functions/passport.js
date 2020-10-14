@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const { verify } = require('hcaptcha');
 const mongo = require('./mongo.js');
 const { genPassword, validPassword } = require('./password.js');
+const shared = require('../shared');
 
 // hCaptcha SETUP
 const hcaptchaSecret = process.env.HCAPTCHA_SECRET || '0x0000000000000000000000000000000000000000';
@@ -13,24 +14,7 @@ module.exports = (app, mongo) => {
             passReqToCallback: true
         }, (req, username, password, cb) => {
             verify(hcaptchaSecret, req.body['h-captcha-response']).then((data) => { if (data['success']) {
-                username = username.toLowerCase();
-                mongo.User.find({ username: username })
-                    .then((user) => {
-                        if (!user[0]) { return cb(null, false); }
-
-                        const isValid = validPassword(password, user[0].hash, user[0].salt);
-
-                        if (isValid) {
-                            return cb(null, user[0]);
-                        } else {
-
-                            return cb(null, false);
-                        }
-
-                    })
-                    .catch((err) => {
-                        cb(err);
-                    });
+                return cb(null, shared.auth(username, password, false));
             } else {
                 return cb(null, false);
             }}).catch(console.error);
