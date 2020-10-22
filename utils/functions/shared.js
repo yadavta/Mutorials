@@ -6,32 +6,31 @@ var Filter = require('bad-words');
 filter = new Filter();
 
 // FUNCTION IMPORTS
-const emailValidation = require('../utils/functions/emailValidation');
-const { genPassword, validPassword } = require('../utils/functions/password');
+const mongo = require('./mongo.js');
+const emailValidation = require('./emailValidation');
+const { genPassword, validPassword } = require('./password.js');
 
-module.exports = (app, mongo) => {
-    auth = (username, password, api) => {
+module.exports = {
+    auth: async (username, password, api) => {
         username = username.toLowerCase();
         mongo.User.find({ username: username }).then((user) => {
             if (!user[0]) { return false; }
-
             const isValid = validPassword(password, user[0].hash, user[0].salt);
-
             if (isValid) {
                 if (api) {
-                    return true;
+                    return user[0]._id;
                 } else {
+                    console.log('should auth ' + user[0]);
                     return user[0];
                 }
             } else {
                 return false;
             }
 
-        })
-        .catch((err) => {
+        }).catch((err) => {
             return false;
         });
-    });
+    },
 
     register: (email, username, password) => {
         var registerInputProblems1 = [];
@@ -124,5 +123,5 @@ module.exports = (app, mongo) => {
             }
         });
 
-    });
+    }
 }

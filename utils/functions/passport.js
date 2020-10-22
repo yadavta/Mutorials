@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const { verify } = require('hcaptcha');
 const mongo = require('./mongo.js');
 const { genPassword, validPassword } = require('./password.js');
-const shared = require('../shared');
+const shared = require('./shared.js');
 
 // hCaptcha SETUP
 const hcaptchaSecret = process.env.HCAPTCHA_SECRET || '0x0000000000000000000000000000000000000000';
@@ -14,7 +14,11 @@ module.exports = (app, mongo) => {
             passReqToCallback: true
         }, (req, username, password, cb) => {
             verify(hcaptchaSecret, req.body['h-captcha-response']).then((data) => { if (data['success']) {
-                return cb(null, shared.auth(username, password, false));
+                console.log('inside passport');
+                shared.auth(username, password, false).then((result) => {
+                    console.log('after api');
+                    return cb(null, result);
+                });
             } else {
                 return cb(null, false);
             }}).catch(console.error);
@@ -34,3 +38,4 @@ module.exports = (app, mongo) => {
     app.use(passport.initialize());
     app.use(passport.session());
 }
+

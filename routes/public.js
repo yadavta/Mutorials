@@ -36,6 +36,7 @@ module.exports = (app, mongo) => {
 
     app.get('/signin', (req, res) => {
         if (!req.isAuthenticated()) {
+            req.flash('stuff: ' + req.user);
             res.render(VIEWS + 'public/signin.ejs', { hcaptchaToken: hcaptchaToken, pageName: "Sign-in to Mutorials" });
         }
         else {
