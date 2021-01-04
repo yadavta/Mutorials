@@ -6,7 +6,9 @@ const shared = require('../utils/functions/shared');
 
 filter = new Filter();
 
-function appValidate(app_code) = { if ( process.env.APP_CODES.split(',').includes(app_code); ) }
+function appValidate(app_code) {
+    return process.env.APP_CODES.split(',').includes(app_code);
+}
 
 module.exports = (app, mongo) => {
     app.post('/api/signup', (req, res, next) => {
